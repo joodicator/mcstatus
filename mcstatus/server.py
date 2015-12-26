@@ -60,7 +60,7 @@ class MinecraftServer:
         else:
             raise exception
 
-    def query(self, retries=3):
+    def query(self, retries=3, timeout=None):
         exception = None
         host = self.host
         try:
@@ -72,7 +72,12 @@ class MinecraftServer:
             pass
         for attempt in range(retries):
             try:
-                connection = UDPSocketConnection((host, self.port))
+                if timeout is not None:
+                    connection = UDPSocketConnection(
+                        (host, self.port), timeout=timeout)
+                else:
+                    connection = UDPSocketConnection(
+                        (host, self.port))
                 querier = ServerQuerier(connection)
                 querier.handshake()
                 return querier.read_query()
