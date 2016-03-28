@@ -45,8 +45,11 @@ class MinecraftServer:
         else:
             raise exception
 
-    def status(self, retries=3, **kwargs):
-        connection = TCPSocketConnection((self.host, self.port))
+    def status(self, retries=3, timeout=None, **kwargs):
+        if timeout is not None:
+            connection = TCPSocketConnection((self.host, self.port), timeout=timeout)
+        else:
+            connection = TCPSocketConnection((self.host, self.port))
         exception = None
         for attempt in range(retries):
             try:
