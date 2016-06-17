@@ -2,7 +2,7 @@ from mcstatus.pinger import ServerPinger
 from mcstatus.protocol.connection import TCPSocketConnection, UDPSocketConnection
 from mcstatus.querier import ServerQuerier
 import dns.resolver
-import sys
+
 
 class MinecraftServer:
     def __init__(self, host, port=25565):
@@ -46,10 +46,7 @@ class MinecraftServer:
             raise exception
 
     def status(self, retries=3, timeout=None, **kwargs):
-        if timeout is not None:
-            connection = TCPSocketConnection((self.host, self.port), timeout=timeout)
-        else:
-            connection = TCPSocketConnection((self.host, self.port))
+        connection = TCPSocketConnection((self.host, self.port), timeout=timeout)
         exception = None
         for attempt in range(retries):
             try:
@@ -59,9 +56,8 @@ class MinecraftServer:
                 result.latency = pinger.test_ping()
                 return result
             except Exception:
-                exception = sys.exc_info
-        else:
-            raise exception[0], exception[1], exception[2]
+                if attempt == retries - 1:
+                    raise
 
     def query(self, retries=3, timeout=None):
         exception = None
@@ -75,16 +71,10 @@ class MinecraftServer:
             pass
         for attempt in range(retries):
             try:
-                if timeout is not None:
-                    connection = UDPSocketConnection(
-                        (host, self.port), timeout=timeout)
-                else:
-                    connection = UDPSocketConnection(
-                        (host, self.port))
+                connection = UDPSocketConnection((host, self.port), timeout=timeout)
                 querier = ServerQuerier(connection)
                 querier.handshake()
                 return querier.read_query()
-            except Exception as e:
-                exception = e
-        else:
-            raise exception
+            except Exception:
+                if attempt == retries - 1:
+                    raise

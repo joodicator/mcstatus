@@ -124,7 +124,8 @@ class Connection:
 
 
 class TCPSocketConnection(Connection):
-    def __init__(self, addr, timeout=3):
+    def __init__(self, addr, timeout=None):
+        if timeout is None: timeout = 3
         Connection.__init__(self)
         self.socket = socket.create_connection(addr, timeout=timeout)
 
@@ -151,7 +152,8 @@ class TCPSocketConnection(Connection):
 
 
 class UDPSocketConnection(Connection):
-    def __init__(self, addr, timeout=3):
+    def __init__(self, addr, timeout=None):
+        if timeout is None: timeout = 3
         Connection.__init__(self)
         self.addr = addr
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
